@@ -90,7 +90,7 @@ export function userCustomClaimSet(
   claimValue: string
 ) {
   logger.log(
-    `🚦 Added custom claim [${claimKey}: ${claimValue}] for user [${uid}].`
+    `🚦 Added custom claim [${claimKey}: ${claimValue}] for user [${uid}]. :)`
   );
 }
 

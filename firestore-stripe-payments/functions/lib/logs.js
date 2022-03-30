@@ -63,7 +63,7 @@ function firestoreDocDeleted(collection, docId) {
 }
 exports.firestoreDocDeleted = firestoreDocDeleted;
 function userCustomClaimSet(uid, claimKey, claimValue) {
-    firebase_functions_1.logger.log(`🚦 Added custom claim [${claimKey}: ${claimValue}] for user [${uid}].`);
+    firebase_functions_1.logger.log(`🚦 Added custom claim [${claimKey}: ${claimValue}] for user [${uid}]. :)`);
 }
 exports.userCustomClaimSet = userCustomClaimSet;
 function badWebhookSecret(error) {

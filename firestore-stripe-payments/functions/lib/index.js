@@ -14,25 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -44,16 +25,13 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.onCustomerDataDeleted = exports.onUserDeleted = exports.handleWebhookEvents = void 0;
-const admin = __importStar(require("firebase-admin"));
-const functions = __importStar(require("firebase-functions"));
-const stripe_1 = __importDefault(require("stripe"));
-const logs = __importStar(require("./logs"));
-const config_1 = __importDefault(require("./config"));
+const admin = require("firebase-admin");
+const functions = require("firebase-functions");
+const stripe_1 = require("stripe");
+const logs = require("./logs");
+const config_1 = require("./config");
 const apiVersion = '2020-08-27';
 const stripe = new stripe_1.default(config_1.default.stripeSecretKey, {
     apiVersion,
@@ -447,18 +425,28 @@ const manageSubscriptionStatusChange = async (subscriptionId, customerId, create
         try {
             // Get existing claims for the user
             const { customClaims } = await admin.auth().getUser(uid);
+            const cosas = [...role.matchAll(/([A-Za-z][A-Za-z][A-Za-z]\d\d)/g)];
+            // eslint-disable-next-line no-return-assign
+            // @ts-ignore
+            cosas.forEach(cosas, (cosa) => {
+                customClaims[cosa[0]] = true;
+                console.log('Found ' + cosa[0]);
+            });
             // Set new role in custom claims as long as the subs status allows
             if (['trialing', 'active'].includes(subscription.status)) {
                 logs.userCustomClaimSet(uid, 'stripeRole', role);
+                console.log('Todos putos');
+                customClaims.stripeRole = role;
                 await admin
                     .auth()
-                    .setCustomUserClaims(uid, Object.assign(Object.assign({}, customClaims), { stripeRole: role }));
+                    .setCustomUserClaims(uid, Object.assign(Object.assign({}, customClaims), { [role]: true }));
             }
             else {
+                console.log('Todos putos1');
                 logs.userCustomClaimSet(uid, 'stripeRole', 'null');
                 await admin
                     .auth()
-                    .setCustomUserClaims(uid, Object.assign(Object.assign({}, customClaims), { stripeRole: null }));
+                    .setCustomUserClaims(uid, Object.assign(Object.assign({}, customClaims), { [role]: false }));
             }
         }
         catch (error) {
@@ -532,7 +520,7 @@ const insertPaymentRecord = async (payment, checkoutSession) => {
 /**
  * A webhook handler function for the relevant Stripe events.
  */
-exports.handleWebhookEvents = functions.handler.https.onRequest(async (req, resp) => {
+exports.handleWebhookEvents = functions.https.onRequest(async (req, resp) => {
     var _a;
     const relevantEvents = new Set([
         'product.created',

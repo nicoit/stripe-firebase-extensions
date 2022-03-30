@@ -536,17 +536,29 @@ const manageSubscriptionStatusChange = async (
     try {
       // Get existing claims for the user
       const { customClaims } = await admin.auth().getUser(uid);
+      const cosas = [...role.matchAll(/([A-Za-z][A-Za-z][A-Za-z]\d\d)/g)]
+
+      // eslint-disable-next-line no-return-assign
+      // @ts-ignore
+      cosas.forEach(cosas, (cosa) => {
+        customClaims[cosa[0]] = true
+            console.log('Found ' + cosa[0])
+          }
+      )
       // Set new role in custom claims as long as the subs status allows
       if (['trialing', 'active'].includes(subscription.status)) {
         logs.userCustomClaimSet(uid, 'stripeRole', role);
+        console.log('Todos putos')
+        customClaims.stripeRole = role
         await admin
           .auth()
-          .setCustomUserClaims(uid, { ...customClaims, stripeRole: role });
+          .setCustomUserClaims(uid, { ...customClaims, [role]: true });
       } else {
+        console.log('Todos putos1')
         logs.userCustomClaimSet(uid, 'stripeRole', 'null');
         await admin
           .auth()
-          .setCustomUserClaims(uid, { ...customClaims, stripeRole: null });
+          .setCustomUserClaims(uid, { ...customClaims, [role]: false });
       }
     } catch (error) {
       // User has been deleted, simply return.
@@ -633,7 +645,7 @@ const insertPaymentRecord = async (
 /**
  * A webhook handler function for the relevant Stripe events.
  */
-export const handleWebhookEvents = functions.handler.https.onRequest(
+export const handleWebhookEvents = functions.https.onRequest(
   async (req: functions.https.Request, resp) => {
     const relevantEvents = new Set([
       'product.created',
