@@ -133,6 +133,7 @@ exports.createCheckoutSession = functions.firestore
       logs.creatingCheckoutSession(context.params.id);
       // Get stripe customer id
       let customerRecord = (await snap.ref.parent.parent.get()).data();
+
       if (!customerRecord?.stripeId) {
         const { email, phoneNumber } = await admin
           .auth()
@@ -143,7 +144,27 @@ exports.createCheckoutSession = functions.firestore
           phone: phoneNumber,
         });
       }
+      logs.creatingCheckoutSession('1 ' + context.params.id + ' ' + customerRecord.stripeId);
+      let stripecustomer = {}
+      try {
+        stripecustomer = await stripe.customers.retrieve(
+            customerRecord.stripeId
+        );
+        console.log(JSON.stringify(stripecustomer))
+      } catch (e) {
+        console.log('Creando stripe customer')
+        logs.creatingCheckoutSession('2 ' + context.params.id + ' ' + customerRecord.stripeId + ' creando' );
+        const { email, phoneNumber } = await admin
+            .auth()
+            .getUser(context.params.uid);
+        customerRecord = await createCustomerRecord({
+          uid: context.params.uid,
+          email,
+          phone: phoneNumber,
+        });
+      }
       const customer = customerRecord.stripeId;
+      logs.creatingCheckoutSession('2' + context.params.id + ' ' + customerRecord.stripeId);
       if (client === 'web') {
         // Get shipping countries
         const shippingCountries: Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[] =
