@@ -83,7 +83,17 @@ export function firestoreDocDeleted(collection: string, docId: string) {
     `🗑🔥📄 Deleted doc [${docId}] from collection [${collection}] in Firestore.`
   );
 }
+export function stripeRolNotfound(docId: string) {
+  logger.log(
+      `🗑🔥📄 ${docId}.`
+  );
+}
 
+export function rolesraros (docId: string) {
+  logger.log(
+      `🗑🔥📄 ${docId}.`
+  );
+}
 export function userCustomClaimSet(
   uid: string,
   claimKey: string,

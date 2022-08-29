@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.webhookHandlerError = exports.webhookHandlerSucceeded = exports.startWebhookEventProcessing = exports.badWebhookSecret = exports.userCustomClaimSet = exports.firestoreDocDeleted = exports.firestoreDocCreated = exports.billingPortalLinkCreationError = exports.createdBillingPortalLink = exports.checkoutSessionCreationError = exports.checkoutSessionCreated = exports.creatingCheckoutSession = exports.customerDeleted = exports.customerCreated = exports.customerDeletionError = exports.customerCreationError = exports.creatingCustomer = void 0;
+exports.webhookHandlerError = exports.webhookHandlerSucceeded = exports.startWebhookEventProcessing = exports.badWebhookSecret = exports.userCustomClaimSet = exports.rolesraros = exports.stripeRolNotfound = exports.firestoreDocDeleted = exports.firestoreDocCreated = exports.billingPortalLinkCreationError = exports.createdBillingPortalLink = exports.checkoutSessionCreationError = exports.checkoutSessionCreated = exports.creatingCheckoutSession = exports.customerDeleted = exports.customerCreated = exports.customerDeletionError = exports.customerCreationError = exports.creatingCustomer = void 0;
 const firebase_functions_1 = require("firebase-functions");
 exports.creatingCustomer = (uid) => {
     firebase_functions_1.logger.log(`⚙️ Creating customer object for [${uid}].`);
@@ -62,6 +62,14 @@ function firestoreDocDeleted(collection, docId) {
     firebase_functions_1.logger.log(`🗑🔥📄 Deleted doc [${docId}] from collection [${collection}] in Firestore.`);
 }
 exports.firestoreDocDeleted = firestoreDocDeleted;
+function stripeRolNotfound(docId) {
+    firebase_functions_1.logger.log(`🗑🔥📄 ${docId}.`);
+}
+exports.stripeRolNotfound = stripeRolNotfound;
+function rolesraros(docId) {
+    firebase_functions_1.logger.log(`🗑🔥📄 ${docId}.`);
+}
+exports.rolesraros = rolesraros;
 function userCustomClaimSet(uid, claimKey, claimValue) {
     firebase_functions_1.logger.log(`🚦 Added custom claim [${claimKey}: ${claimValue}] for user [${uid}]. :)`);
 }

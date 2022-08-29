@@ -500,6 +500,7 @@ const manageSubscriptionStatusChange = async (
   }
   const product: Stripe.Product = price.product as Stripe.Product;
   const role = product.metadata.firebaseRole ?? null;
+ // logs.stripeRolNotfound('producto ins firebaseRole ' + JSON.stringify(product));
   // Get reference to subscription doc in Cloud Firestore.
   const subsDbRef = customersSnap.docs[0].ref
     .collection('subscriptions')
@@ -556,19 +557,26 @@ const manageSubscriptionStatusChange = async (
   if (role) {
     try {
       // Get existing claims for the user
-      const { customClaims } = await admin.auth().getUser(uid);
+      let { customClaims } = await admin.auth().getUser(uid);
+      if (!customClaims) {
+        logs.rolesraros('sin customClaims: ' + JSON.stringify(customClaims));
+        customClaims = {}
+      }
       const cosas = [...role.matchAll(/([A-Za-z][A-Za-z][A-Za-z]\d\d)/g)]
-
+      if (cosas.length < 1)
+        logs.rolesraros('Roles raro: ' +JSON.stringify(cosas));
       // eslint-disable-next-line no-return-assign
       // @ts-ignore
-      cosas.forEach(cosas, (cosa) => {
+      cosas.forEach( (cosa) => {
+        console.log(JSON.stringify(cosa))
+        console.log('Found ' + cosa[0])
         customClaims[cosa[0]] = true
-            console.log('Found ' + cosa[0])
-          }
-      )
+          })
+      logs.rolesraros('customClaims ' +JSON.stringify(customClaims));
       // Set new role in custom claims as long as the subs status allows
+     // console.log(JSON.stringify(subscription))
       if (['trialing', 'active'].includes(subscription.status)) {
-        logs.userCustomClaimSet(uid, 'stripeRole', role);
+        logs.userCustomClaimSet(uid, 'stripeRole', JSON.stringify({ ...customClaims, [role]: true }));
         console.log('Todos putos')
         customClaims.stripeRole = role
         await admin
@@ -581,7 +589,10 @@ const manageSubscriptionStatusChange = async (
           .auth()
           .setCustomUserClaims(uid, { ...customClaims, [role]: false });
       }
+      let userfinal = await admin.auth().getUser(uid)
+      console.log(JSON.stringify(userfinal))
     } catch (error) {
+      console.log('Fallo en setear customclaims ', error)
       // User has been deleted, simply return.
       return;
     }
